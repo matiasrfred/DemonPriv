@@ -15,6 +15,7 @@ from config.settings import IMG_DIR, WINDOW_CONFIG
 from config.database import DatabaseManager
 from utils.logger import Logger
 from utils.file_processor import FileProcessor
+from utils.system_tray import SystemTray  # Importamos el nuevo módulo
 from gui.styles import setup_styles
 from gui.tabs.config_tab import ConfigTab
 from gui.tabs.directory_tab import DirectoryTab
@@ -62,6 +63,9 @@ class Application:
         
         # Verificar si debe iniciar el procesamiento automáticamente
         self.check_autoprocess()
+        
+        # Inicializar el system tray
+        self.system_tray = SystemTray(self.root, self.logger)
     
     def setup_window(self):
         """Configura la ventana principal."""

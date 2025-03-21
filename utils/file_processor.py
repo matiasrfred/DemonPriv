@@ -123,21 +123,42 @@ class FileProcessor:
                             if self.logger:
                                 self.logger.log_message(f"Archivo enviado a API exitosamente: {archivo_mas_antiguo}")
                         else:
-                            # No mover el archivo a procesados, sino a error/mes_año
+                            # No mover el archivo a procesados, sino a error/mes_año/dia
                             mover_archivo = False
-                            # Obtener la fecha actual para la carpeta mes_año
-                            fecha_actual = datetime.datetime.now()
-                            nombre_carpeta_mes = f"{fecha_actual.strftime('%m_%Y')}"  # formato: mes_año (01_2025)
                             
-                            # Crear la estructura de carpetas para errores: error/mes_año
-                            ruta_error_base = os.path.join(ruta_procesado, "error")
-                            os.makedirs(ruta_error_base, exist_ok=True)
+                            # Extraer la fecha del documento
+                            fecha_documento = self.extraer_fecha_documento(ruta_archivo)
                             
-                            ruta_error_mes = os.path.join(ruta_error_base, nombre_carpeta_mes)
-                            os.makedirs(ruta_error_mes, exist_ok=True)
-                            
-                            # Definir la ruta de destino en la carpeta de error del mes correspondiente
-                            destino_error = os.path.join(ruta_error_mes, archivo_mas_antiguo)
+                            if fecha_documento:
+                                # Convertir la fecha a objetos para obtener año, mes y día
+                                fecha = datetime.datetime.strptime(fecha_documento, '%Y-%m-%d')
+                                mes_anio = f"{fecha.strftime('%m_%Y')}"  # formato: mes_año (01_2025)
+                                dia = f"{fecha.day:02d}"  # formato: día con dos dígitos (01, 02, etc.)
+                                
+                                # Crear la estructura de carpetas para errores: error/mes_año/dia
+                                ruta_error_base = os.path.join(ruta_procesado, "error")
+                                os.makedirs(ruta_error_base, exist_ok=True)
+                                
+                                ruta_error_mes = os.path.join(ruta_error_base, mes_anio)
+                                os.makedirs(ruta_error_mes, exist_ok=True)
+                                
+                                ruta_error_dia = os.path.join(ruta_error_mes, dia)
+                                os.makedirs(ruta_error_dia, exist_ok=True)
+                                
+                                # Definir la ruta de destino en la carpeta de error del día correspondiente
+                                destino_error = os.path.join(ruta_error_dia, archivo_mas_antiguo)
+                            else:
+                                # Si no se pudo extraer la fecha, usar la estructura anterior
+                                fecha_actual = datetime.datetime.now()
+                                nombre_carpeta_mes = f"{fecha_actual.strftime('%m_%Y')}"
+                                
+                                ruta_error_base = os.path.join(ruta_procesado, "error")
+                                os.makedirs(ruta_error_base, exist_ok=True)
+                                
+                                ruta_error_mes = os.path.join(ruta_error_base, nombre_carpeta_mes)
+                                os.makedirs(ruta_error_mes, exist_ok=True)
+                                
+                                destino_error = os.path.join(ruta_error_mes, archivo_mas_antiguo)
                             
                             try:
                                 shutil.move(ruta_archivo, destino_error)
@@ -151,19 +172,39 @@ class FileProcessor:
                         if self.logger:
                             self.logger.log_message(f"Error al procesar con API: {api_error}", "ERROR")
                         
-                        # Obtener la fecha actual para la carpeta mes_año
-                        fecha_actual = datetime.datetime.now()
-                        nombre_carpeta_mes = f"{fecha_actual.strftime('%m_%Y')}"  # formato: mes_año (01_2025)
+                        # Extraer la fecha del documento
+                        fecha_documento = self.extraer_fecha_documento(ruta_archivo)
                         
-                        # Crear la estructura de carpetas para errores: error/mes_año
-                        ruta_error_base = os.path.join(ruta_procesado, "error")
-                        os.makedirs(ruta_error_base, exist_ok=True)
-                        
-                        ruta_error_mes = os.path.join(ruta_error_base, nombre_carpeta_mes)
-                        os.makedirs(ruta_error_mes, exist_ok=True)
-                        
-                        # Definir la ruta de destino en la carpeta de error del mes correspondiente
-                        destino_error = os.path.join(ruta_error_mes, archivo_mas_antiguo)
+                        if fecha_documento:
+                            # Convertir la fecha a objetos para obtener año, mes y día
+                            fecha = datetime.datetime.strptime(fecha_documento, '%Y-%m-%d')
+                            mes_anio = f"{fecha.strftime('%m_%Y')}"  # formato: mes_año (01_2025)
+                            dia = f"{fecha.day:02d}"  # formato: día con dos dígitos (01, 02, etc.)
+                            
+                            # Crear la estructura de carpetas para errores: error/mes_año/dia
+                            ruta_error_base = os.path.join(ruta_procesado, "error")
+                            os.makedirs(ruta_error_base, exist_ok=True)
+                            
+                            ruta_error_mes = os.path.join(ruta_error_base, mes_anio)
+                            os.makedirs(ruta_error_mes, exist_ok=True)
+                            
+                            ruta_error_dia = os.path.join(ruta_error_mes, dia)
+                            os.makedirs(ruta_error_dia, exist_ok=True)
+                            
+                            # Definir la ruta de destino en la carpeta de error del día correspondiente
+                            destino_error = os.path.join(ruta_error_dia, archivo_mas_antiguo)
+                        else:
+                            # Si no se pudo extraer la fecha, usar la estructura anterior
+                            fecha_actual = datetime.datetime.now()
+                            nombre_carpeta_mes = f"{fecha_actual.strftime('%m_%Y')}"
+                            
+                            ruta_error_base = os.path.join(ruta_procesado, "error")
+                            os.makedirs(ruta_error_base, exist_ok=True)
+                            
+                            ruta_error_mes = os.path.join(ruta_error_base, nombre_carpeta_mes)
+                            os.makedirs(ruta_error_mes, exist_ok=True)
+                            
+                            destino_error = os.path.join(ruta_error_mes, archivo_mas_antiguo)
                         
                         try:
                             shutil.move(ruta_archivo, destino_error)
@@ -185,19 +226,39 @@ class FileProcessor:
                         if self.logger:
                             self.logger.log_message(f"Error al mover archivo procesado: {e}", "ERROR")
                         
-                        # Obtener la fecha actual para la carpeta mes_año
-                        fecha_actual = datetime.datetime.now()
-                        nombre_carpeta_mes = f"{fecha_actual.strftime('%m_%Y')}"  # formato: mes_año (01_2025)
+                        # Extraer la fecha del documento
+                        fecha_documento = self.extraer_fecha_documento(ruta_archivo)
                         
-                        # Crear la estructura de carpetas para errores: error/mes_año
-                        ruta_error_base = os.path.join(ruta_procesado, "error")
-                        os.makedirs(ruta_error_base, exist_ok=True)
-                        
-                        ruta_error_mes = os.path.join(ruta_error_base, nombre_carpeta_mes)
-                        os.makedirs(ruta_error_mes, exist_ok=True)
-                        
-                        # Definir la ruta de destino en la carpeta de error del mes correspondiente
-                        destino_error = os.path.join(ruta_error_mes, archivo_mas_antiguo)
+                        if fecha_documento:
+                            # Convertir la fecha a objetos para obtener año, mes y día
+                            fecha = datetime.datetime.strptime(fecha_documento, '%Y-%m-%d')
+                            mes_anio = f"{fecha.strftime('%m_%Y')}"  # formato: mes_año (01_2025)
+                            dia = f"{fecha.day:02d}"  # formato: día con dos dígitos (01, 02, etc.)
+                            
+                            # Crear la estructura de carpetas para errores: error/mes_año/dia
+                            ruta_error_base = os.path.join(ruta_procesado, "error")
+                            os.makedirs(ruta_error_base, exist_ok=True)
+                            
+                            ruta_error_mes = os.path.join(ruta_error_base, mes_anio)
+                            os.makedirs(ruta_error_mes, exist_ok=True)
+                            
+                            ruta_error_dia = os.path.join(ruta_error_mes, dia)
+                            os.makedirs(ruta_error_dia, exist_ok=True)
+                            
+                            # Definir la ruta de destino en la carpeta de error del día correspondiente
+                            destino_error = os.path.join(ruta_error_dia, archivo_mas_antiguo)
+                        else:
+                            # Si no se pudo extraer la fecha, usar la estructura anterior
+                            fecha_actual = datetime.datetime.now()
+                            nombre_carpeta_mes = f"{fecha_actual.strftime('%m_%Y')}"
+                            
+                            ruta_error_base = os.path.join(ruta_procesado, "error")
+                            os.makedirs(ruta_error_base, exist_ok=True)
+                            
+                            ruta_error_mes = os.path.join(ruta_error_base, nombre_carpeta_mes)
+                            os.makedirs(ruta_error_mes, exist_ok=True)
+                            
+                            destino_error = os.path.join(ruta_error_mes, archivo_mas_antiguo)
                         
                         try:
                             shutil.move(ruta_archivo, destino_error)
@@ -217,3 +278,52 @@ class FileProcessor:
         except Exception as e:
             if self.logger:
                 self.logger.log_message(f"Error general en el proceso: {e}", "ERROR")
+
+    def extraer_fecha_documento(self, ruta_archivo):
+        """
+        Extrae la fecha del documento (ya sea boleta o factura).
+        
+        Args:
+            ruta_archivo: Ruta al archivo TXT.
+            
+        Returns:
+            str: Fecha en formato YYYY-MM-DD o None si no se pudo extraer.
+        """
+        try:
+            # Leer el archivo
+            with open(ruta_archivo, 'r', encoding='utf-8') as file:
+                lines = file.readlines()
+            
+            # Buscar por secciones
+            current_section = None
+            for line in lines:
+                line = line.strip()
+                
+                # Detectar sección
+                if line.startswith("->"):
+                    current_section = line.strip("->").strip("<-")
+                    continue
+                
+                # Si estamos en la sección Boleta, extraer fecha
+                if current_section == "Boleta" and line:
+                    parts = line.split(';')
+                    if len(parts) > 2:
+                        # La fecha está en la posición 2 (índice desde 0)
+                        return parts[2]  # Retorna la fecha en formato YYYY-MM-DD
+                
+                # Si estamos en la sección Encabezado, extraer fecha
+                if current_section == "Encabezado" and line:
+                    parts = line.split(';')
+                    if len(parts) > 2:
+                        # La fecha está en la posición 2 (índice desde 0)
+                        return parts[2]  # Retorna la fecha en formato YYYY-MM-DD
+            
+            # Si llegamos aquí, no se encontró la fecha
+            if self.logger:
+                self.logger.log_message(f"No se pudo extraer la fecha del documento: {ruta_archivo}", "WARNING")
+            return None
+                
+        except Exception as e:
+            if self.logger:
+                self.logger.log_message(f"Error al extraer fecha del documento: {e}", "ERROR")
+            return None
